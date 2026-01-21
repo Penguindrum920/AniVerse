@@ -10,3 +10,4 @@ groq==0.4.2
 pydantic==2.5.3
 sqlalchemy==2.0.25
 python-multipart==0.0.6
+gdown==5.1.0

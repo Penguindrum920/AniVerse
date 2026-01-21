@@ -1,4 +1,6 @@
-# AniVerse Full Stack Dockerfile for Railway
+# AniVerse Backend Dockerfile for Railway
+# Data is downloaded from Google Drive on first startup
+
 FROM python:3.11-slim
 
 # Set working directory
@@ -9,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     curl \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for caching
@@ -20,20 +23,20 @@ RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/wh
 # Then install other requirements
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy dataset files
-COPY dataset/ ./dataset/
-
 # Copy backend application code
 COPY backend/ .
+
+# Make startup script executable
+RUN chmod +x start.sh
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV HOST=0.0.0.0
 ENV PORT=8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+# Health check (with longer start period for data download)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=300s --retries=5 \
     CMD curl -f http://localhost:${PORT:-8000}/api/health || exit 1
 
-# Run the application
-CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}
+# Run the startup script (downloads data then starts server)
+CMD ["./start.sh"]
