@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AniVerse - Discover Anime</title>
+    <meta name="description" content="AI-powered anime discovery with semantic search and personalized recommendations">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css?v=5">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <div class="brand-icon">▲</div>
+            <span class="brand-text">AniVerse</span>
+        </div>
+        <div class="nav-links">
+            <!-- Mode Toggle -->
+            <div class="mode-toggle" id="modeToggle">
+                <button class="mode-btn active" data-mode="anime" onclick="switchMode('anime')">Anime</button>
+                <button class="mode-btn" data-mode="manga" onclick="switchMode('manga')">Manga</button>
+            </div>
+            <div class="nav-divider"></div>
+            <a href="#" class="nav-link active" data-view="discover"
+                onclick="loadCurrentMode(); return false;">Discover</a>
+            <a href="#" class="nav-link" data-view="top-rated" onclick="loadTopRated(); return false;">Top Rated</a>
+            <a href="#" class="nav-link" data-view="popular" onclick="loadPopular(); return false;">Popular</a>
+            <a href="#" class="nav-link" data-view="genres" onclick="showGenreFilter(); return false;">Genres</a>
+        </div>
+        <div class="nav-actions">
+            <div class="keyboard-hint" title="Press / to search">
+                <kbd>/</kbd>
+            </div>
+            <button class="btn-theme" id="themeToggle" title="Toggle theme (T)">
+                <span class="theme-icon">◐</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span>Find anime that</span>
+                <span>matches your <span class="highlight">vibe</span></span>
+            </h1>
+            <p class="hero-subtitle">
+                Describe a mood, a scene, or a feeling. Our AI understands what you mean.
+            </p>
+
+            <!-- Search Box -->
+            <div class="search-container">
+                <div class="search-box">
+                    <span class="search-icon">⌕</span>
+                    <input type="text" id="searchInput" class="search-input"
+                        placeholder="dark thriller with genius protagonist..." autocomplete="off">
+                    <button class="search-btn" id="searchBtn">Search</button>
+                </div>
+                <div class="search-examples">
+                    <span>Try:</span>
+                    <button class="example-chip" data-query="anime with rooftop confession scene">rooftop
+                        confession</button>
+                    <button class="example-chip" data-query="epic training arc underdog">training arc</button>
+                    <button class="example-chip" data-query="isekai overpowered protagonist">isekai OP MC</button>
+                    <button class="example-chip" data-query="melancholic bittersweet ending">bittersweet</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Stats Bar -->
+    <div class="stats-bar" id="statsBar">
+        <div class="stat-item">
+            <span class="stat-value" id="statTotal">20,654</span>
+            <span class="stat-label">Anime Indexed</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-value" id="statGenres">40+</span>
+            <span class="stat-label">Genres</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-value" id="statScenes">25+</span>
+            <span class="stat-label">Scene Types</span>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <section class="results-section" id="resultsSection">
+        <div class="results-header">
+            <h2 class="results-title" id="resultsTitle">Top Rated</h2>
+            <span class="results-count" id="resultsCount"></span>
+            <div class="results-actions">
+                <button class="view-toggle active" data-view="grid" title="Grid view">▦</button>
+                <button class="view-toggle" data-view="list" title="List view">☰</button>
+            </div>
+        </div>
+        <div class="anime-grid" id="animeGrid">
+            <!-- Skeleton loading -->
+            <div class="skeleton-grid" id="skeletonGrid">
+                <div class="skeleton-card">
+                    <div class="skeleton-image"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text short"></div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton-image"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text short"></div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton-image"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text short"></div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton-image"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text short"></div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton-image"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text short"></div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton-image"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text short"></div>
+                </div>
+            </div>
+            <!-- Loading state (hidden by default) -->
+            <div class="loading-state" id="loadingState" style="display: none;">
+                <div class="loader"></div>
+                <p>Finding anime...</p>
+            </div>
+            <!-- Empty state -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <span class="empty-icon">∅</span>
+                <p>No results found</p>
+                <button class="btn-secondary" onclick="loadInitialData()">Show Top Rated</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Anime Detail Modal -->
+    <div class="modal" id="animeModal">
+        <div class="modal-backdrop" id="modalBackdrop"></div>
+        <div class="modal-content" id="modalContent">
+            <button class="modal-close" id="modalClose" title="Close (Esc)">×</button>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- AI Chat Panel -->
+    <div class="chat-panel" id="chatPanel">
+        <div class="chat-header">
+            <span class="chat-title">AI Assistant</span>
+            <div class="chat-header-actions">
+                <button class="chat-toggle" id="chatToggle" title="Toggle (C)">−</button>
+            </div>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message assistant">
+                    <p>Hey! I can help you find anime and manage your list.</p>
+                    <p class="chat-hint-text">Try: "Add Death Note to completed with rating 10"</p>
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Ask anything...">
+                <button class="chat-send" id="chatSend">→</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div class="shortcuts-modal" id="shortcutsModal">
+        <div class="shortcuts-content">
+            <h3>Keyboard Shortcuts</h3>
+            <div class="shortcut-row"><kbd>/</kbd><span>Focus search</span></div>
+            <div class="shortcut-row"><kbd>C</kbd><span>Toggle chat</span></div>
+            <div class="shortcut-row"><kbd>T</kbd><span>Toggle theme</span></div>
+            <div class="shortcut-row"><kbd>Esc</kbd><span>Close modal</span></div>
+            <div class="shortcut-row"><kbd>?</kbd><span>Show shortcuts</span></div>
+            <button class="btn-close" onclick="document.getElementById('shortcutsModal').classList.remove('active')">Got
+                it</button>
+        </div>
+    </div>
+
+    <!-- MAL Import Modal -->
+    <div class="import-modal" id="importModal">
+        <div class="import-backdrop" onclick="closeImportModal()"></div>
+        <div class="import-content">
+            <button class="modal-close" onclick="closeImportModal()">✕</button>
+            <h2>🔄 Import from MyAnimeList</h2>
+            <p class="import-subtitle">Bring your anime list to AniVerse</p>
+
+            <div class="import-options">
+                <!-- Option 1: OAuth -->
+                <div class="import-option">
+                    <div class="option-header">
+                        <span class="option-icon">🔗</span>
+                        <h3>Connect MAL Account</h3>
+                        <span class="option-badge recommended">Recommended</span>
+                    </div>
+                    <p>Automatically sync your list by connecting your MAL account.</p>
+                    <button class="btn-import-primary" onclick="startMALOAuth()">
+                        Connect to MyAnimeList →
+                    </button>
+                </div>
+
+                <div class="import-divider"><span>OR</span></div>
+
+                <!-- Option 2: XML Upload -->
+                <div class="import-option">
+                    <div class="option-header">
+                        <span class="option-icon">📁</span>
+                        <h3>Upload XML Export</h3>
+                    </div>
+                    <p>Import from an XML file exported from MAL.</p>
+
+                    <div class="import-instructions">
+                        <h4>📋 How to export from MAL:</h4>
+                        <ol>
+                            <li>Go to <a href="https://myanimelist.net/panel.php?go=export" target="_blank">MAL Export
+                                    Page</a></li>
+                            <li>Click <strong>"Export My Anime List"</strong></li>
+                            <li>Download the XML file</li>
+                            <li>Upload it below</li>
+                        </ol>
+                    </div>
+
+                    <div class="file-upload-zone" id="uploadZone">
+                        <input type="file" id="xmlFileInput" accept=".xml,.gz" hidden>
+                        <span class="upload-icon">📤</span>
+                        <p>Drop your XML file here or <button
+                                onclick="document.getElementById('xmlFileInput').click()">browse</button></p>
+                        <span class="file-name" id="fileName"></span>
+                    </div>
+                    <button class="btn-import-secondary" id="uploadBtn" onclick="uploadMALXml()" disabled>
+                        Upload & Import
+                    </button>
+                </div>
+            </div>
+
+            <div class="import-progress" id="importProgress" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <p id="importStatus">Importing your anime list...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Genre Filter Modal -->
+    <div class="genre-modal" id="genreModal">
+        <div class="genre-backdrop" onclick="closeGenreModal()"></div>
+        <div class="genre-content">
+            <button class="modal-close" onclick="closeGenreModal()">✕</button>
+            <h3>Filter by Genre</h3>
+            <div class="genre-grid" id="genreGrid">
+                <!-- Genres loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="components/app.js?v=5"></script>
+</body>
+
+</html>

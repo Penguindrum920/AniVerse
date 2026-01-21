@@ -1,0 +1,46 @@
+# AniVerse - AI Anime Discovery Platform
+
+## Dependencies
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+node_modules/
+
+## Environment
+.env
+*.env.local
+
+## IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Logs
+*.log
+
+## Database (local only)
+backend/aniverse.db
+
+## Loading folder (unused)
+loading/
+
+## Large files - excluded from Git (too big for GitHub)
+backend/chroma_db/
+backend/manga_chroma_db/
+dataset/
+
