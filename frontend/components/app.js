@@ -3,10 +3,14 @@
  * AI-powered anime discovery with auth, lists, and ratings
  */
 
-// Auto-detect API base: use relative path in production (Docker), localhost in dev
+// API Configuration
+// For production: Set RAILWAY_BACKEND_URL to your Railway deployment URL
+// For local dev: Uses localhost
+const RAILWAY_BACKEND_URL = 'https://aniverse-production.up.railway.app'; // UPDATE THIS after Railway deployment
+
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:8000'
-    : '';
+    : RAILWAY_BACKEND_URL;
 
 // Auth State
 let currentUser = null;
