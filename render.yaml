@@ -1,0 +1,15 @@
+# Render.com Configuration
+services:
+  - type: web
+    name: aniverse-api
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python setup_data.py && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: GROQ_API_KEY
+        sync: false
+    healthCheckPath: /api/health
+    rootDirectory: backend

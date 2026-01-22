@@ -1,7 +1,6 @@
 """ChromaDB Vector Store for Anime Similarity Search"""
 import chromadb
 from chromadb.config import Settings
-from chromadb.utils import embedding_functions
 from typing import Optional
 import sys
 from pathlib import Path
@@ -26,8 +25,11 @@ class AnimeVectorStore:
                 )
             )
             
-            # Use ChromaDB's default embedding function
-            self.embedding_fn = embedding_functions.DefaultEmbeddingFunction()
+            # Use sentence-transformers for embeddings (more compatible than onnxruntime)
+            from chromadb.utils import embedding_functions
+            self.embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
+                model_name=EMBEDDING_MODEL
+            )
             
             # Get or create anime collection with embedding function
             self.collection = self.client.get_or_create_collection(
@@ -158,4 +160,3 @@ def get_vector_store() -> AnimeVectorStore:
     if _store is None:
         _store = AnimeVectorStore()
     return _store
-

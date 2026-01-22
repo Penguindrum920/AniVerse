@@ -11,6 +11,6 @@ pydantic==2.5.3
 sqlalchemy==2.0.25
 python-multipart==0.0.6
 gdown==5.1.0
-onnxruntime==1.16.3
 PyJWT==2.8.0
+
 

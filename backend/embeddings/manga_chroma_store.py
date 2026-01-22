@@ -16,23 +16,35 @@ class MangaVectorStore:
     def __init__(self, persist_directory: str = None):
         self.persist_dir = persist_directory or str(MANGA_CHROMA_DB_PATH)
         
-        # Initialize ChromaDB client
-        self.client = chromadb.PersistentClient(
-            path=self.persist_dir,
-            settings=Settings(anonymized_telemetry=False)
-        )
-        
-        # Use ChromaDB's default embedding function
-        self.embedding_fn = embedding_functions.DefaultEmbeddingFunction()
-        
-        # Get or create manga collection with embedding function
-        self.collection = self.client.get_or_create_collection(
-            name="manga",
-            metadata={"hnsw:space": "cosine"},
-            embedding_function=self.embedding_fn
-        )
-        
-        print(f"Manga vector store initialized at {self.persist_dir}")
+        try:
+            # Initialize ChromaDB client
+            self.client = chromadb.PersistentClient(
+                path=self.persist_dir,
+                settings=Settings(
+                    anonymized_telemetry=False,
+                    allow_reset=True
+                )
+            )
+            
+            # Use sentence-transformers for embeddings (more compatible)
+            self.embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
+                model_name=EMBEDDING_MODEL
+            )
+            
+            # Get or create manga collection with embedding function
+            self.collection = self.client.get_or_create_collection(
+                name="manga",
+                metadata={"hnsw:space": "cosine"},
+                embedding_function=self.embedding_fn
+            )
+            
+            print(f"Manga vector store initialized at {self.persist_dir}")
+            print(f"Manga collection count: {self.collection.count()}")
+        except Exception as e:
+            print(f"ERROR initializing manga vector store: {e}")
+            import traceback
+            traceback.print_exc()
+            raise
     
     def add_manga(
         self,
