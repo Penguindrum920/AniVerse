@@ -18,23 +18,13 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# CORS middleware for frontend
-# Allow all origins for development and production
+# CORS middleware - Allow ALL origins for cross-domain requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5500",
-        "http://127.0.0.1:5500",
-        "http://localhost:3000",
-        "https://aniverse-tau.vercel.app",
-        "https://aniverse.vercel.app",
-        "https://*.vercel.app",
-    ],
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_origins=["*"],
+    allow_credentials=False,  # Must be False when using wildcard
+    allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"],
-    allow_origin_regex=r"https://.*\.vercel\.app",
 )
 
 # Include routers

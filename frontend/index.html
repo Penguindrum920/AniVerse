@@ -1,279 +1,975 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AniVerse - Discover Anime</title>
-    <meta name="description" content="AI-powered anime discovery with semantic search and personalized recommendations">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css?v=5">
+    <title>AniVerse - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f23;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(255, 107, 107, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(78, 205, 196, 0.15) 0%, transparent 50%);
+            animation: backgroundShift 20s ease-in-out infinite;
+        }
+
+        @keyframes backgroundShift {
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(-10%, -5%);
+            }
+        }
+
+        .container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 80px;
+            z-index: 1;
+        }
+
+        .blobs-container {
+            position: relative;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .blob {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
+            box-shadow: 0 15px 60px rgba(255, 107, 107, 0.4),
+                inset 0 -10px 30px rgba(0, 0, 0, 0.1);
+            animation: blobMorph 6s ease-in-out infinite;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            filter: brightness(1.1);
+            justify-self: center;
+            align-self: center;
+        }
+
+        /* Orange Blob - Semi-circle */
+        .blob-1 {
+            background: linear-gradient(180deg, #FF8C42 0%, #FF6B35 100%);
+            animation: blobMorph1 5s ease-in-out infinite;
+            width: 220px;
+            height: 180px;
+            border-radius: 50% 50% 15% 15% / 100% 100% 0% 0%;
+        }
+
+        @keyframes blobMorph1 {
+
+            0%,
+            100% {
+                border-radius: 50% 50% 15% 15% / 100% 100% 0% 0%;
+                transform: rotate(0deg) scale(1);
+            }
+
+            50% {
+                border-radius: 45% 55% 12% 18% / 95% 100% 0% 0%;
+                transform: rotate(-3deg) scale(1.03);
+            }
+        }
+
+        /* Purple Blob - Rectangle */
+        .blob-2 {
+            background: linear-gradient(180deg, #9B59B6 0%, #7B3FF2 100%);
+            animation: blobMorph2 6s ease-in-out infinite;
+            width: 130px;
+            height: 230px;
+            border-radius: 20px;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes blobMorph2 {
+
+            0%,
+            100% {
+                border-radius: 15px;
+                transform: rotate(0deg) scale(1);
+            }
+
+            50% {
+                border-radius: 18px 12px 15px 18px;
+                transform: rotate(2deg) scale(1.02);
+            }
+        }
+
+        /* Sneaky behavior - turn around when others cover eyes */
+        .blob-2.sneaky {
+            transform: rotateY(165deg) translateX(15px);
+        }
+
+        .blob-2.sneaky .eyes {
+            transform: rotateY(180deg) translateX(-8px);
+        }
+
+        /* Yellow Blob - Rounded Square/Cylinder */
+        .blob-3 {
+            background: linear-gradient(180deg, #FFD93D 0%, #FFC107 100%);
+            animation: blobMorph3 7s ease-in-out infinite;
+            width: 120px;
+            height: 190px;
+            border-radius: 25px 25px 20px 20px;
+        }
+
+        @keyframes blobMorph3 {
+
+            0%,
+            100% {
+                border-radius: 20px 20px 15px 15px;
+                transform: rotate(0deg) scale(1);
+            }
+
+            50% {
+                border-radius: 25px 25px 18px 18px;
+                transform: rotate(-2deg) scale(1.02);
+            }
+        }
+
+        /* Teal Blob - Organic blob */
+        .blob-4 {
+            background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+            animation: blobMorph4 5.5s ease-in-out infinite;
+            width: 160px;
+            height: 150px;
+            border-radius: 60% 40% 40% 60% / 50% 50% 50% 50%;
+        }
+
+        @keyframes blobMorph4 {
+
+            0%,
+            100% {
+                border-radius: 60% 40% 40% 60% / 50% 50% 50% 50%;
+                transform: rotate(0deg) scale(1);
+            }
+
+            50% {
+                border-radius: 40% 60% 60% 40% / 60% 40% 60% 40%;
+                transform: rotate(4deg) scale(1.03);
+            }
+        }
+
+        @keyframes blobMorph {
+
+            0%,
+            100% {
+                border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
+                transform: rotate(0deg) scale(1);
+            }
+
+            25% {
+                border-radius: 40% 60% 70% 30% / 40% 60% 30% 60%;
+                transform: rotate(-5deg) scale(1.05);
+            }
+
+            50% {
+                border-radius: 70% 30% 30% 70% / 60% 40% 60% 40%;
+                transform: rotate(5deg) scale(0.98);
+            }
+
+            75% {
+                border-radius: 30% 70% 50% 50% / 50% 70% 30% 50%;
+                transform: rotate(-3deg) scale(1.02);
+            }
+        }
+
+        .eyes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            transition: transform 0.3s ease;
+        }
+
+        .eye {
+            width: 38px;
+            height: 42px;
+            background: white;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3),
+                inset 0 2px 5px rgba(255, 255, 255, 0.8);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        /* Blob 1 - Big round eyes */
+        .blob-1 .eye {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+        }
+
+        .blob-1 .pupil {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Blob 2 - Narrow sneaky eyes */
+        .blob-2 .eye {
+            width: 46px;
+            height: 48px;
+            border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
+        }
+
+        .blob-2 .pupil {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Blob 3 - Wide cheerful eyes */
+        .blob-3 .eye {
+            width: 54px;
+            height: 50px;
+            border-radius: 50%;
+        }
+
+        .blob-3 .pupil {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Blob 4 - Oval calm eyes */
+        .blob-4 .eye {
+            width: 44px;
+            height: 56px;
+            border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
+        }
+
+        .blob-4 .pupil {
+            width: 18px;
+            height: 18px;
+        }
+
+        .pupil {
+            width: 16px;
+            height: 16px;
+            background: radial-gradient(circle at 30% 30%, #2d3436, #000);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.15s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .pupil::after {
+            content: '';
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 4px;
+        }
+
+        .mouth {
+            position: absolute;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 25px;
+            border: 4px solid rgba(255, 255, 255, 0.8);
+            border-top: none;
+            border-radius: 0 0 50px 50px;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+
+        .hand {
+            position: absolute;
+            width: 55px;
+            height: 55px;
+            background: inherit;
+            border-radius: 60% 40% 55% 45% / 50% 50% 50% 50%;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            pointer-events: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            filter: brightness(0.95);
+        }
+
+        .hand-left {
+            left: -25px;
+            top: 45%;
+            transform: translateY(-50%) rotate(-15deg);
+        }
+
+        .hand-right {
+            right: -25px;
+            top: 45%;
+            transform: translateY(-50%) rotate(15deg);
+        }
+
+        .blob.covering .hand {
+            opacity: 1;
+        }
+
+        .blob.covering .hand-left {
+            left: 35px;
+            transform: translateY(-50%) rotate(5deg) scale(1.1);
+        }
+
+        .blob.covering .hand-right {
+            right: 35px;
+            transform: translateY(-50%) rotate(-5deg) scale(1.1);
+        }
+
+        .blob.covering .eye {
+            transform: scaleY(0.1);
+            opacity: 0.3;
+        }
+
+        .blob.covering .pupil {
+            opacity: 0;
+        }
+
+        .blob.happy {
+            animation: wiggle 0.6s ease;
+        }
+
+        .blob.happy .mouth {
+            opacity: 1;
+            height: 30px;
+            width: 60px;
+        }
+
+        /* Blob 1 - Wide happy smile */
+        .blob-1.happy .mouth {
+            width: 65px;
+            height: 32px;
+        }
+
+        /* Blob 2 - Sly smirk */
+        .blob-2.happy .mouth {
+            width: 45px;
+            height: 22px;
+            transform: translateX(-50%) rotate(-5deg);
+        }
+
+        /* Blob 3 - Big grin */
+        .blob-3.happy .mouth {
+            width: 70px;
+            height: 35px;
+            border-width: 5px;
+        }
+
+        /* Blob 4 - Gentle smile */
+        .blob-4.happy .mouth {
+            width: 50px;
+            height: 25px;
+        }
+
+        .blob.happy .eye {
+            height: 25px;
+            border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
+        }
+
+        @keyframes wiggle {
+
+            0%,
+            100% {
+                transform: rotate(0deg) scale(1);
+            }
+
+            25% {
+                transform: rotate(-8deg) scale(1.08);
+            }
+
+            50% {
+                transform: rotate(8deg) scale(1.08);
+            }
+
+            75% {
+                transform: rotate(-8deg) scale(1.08);
+            }
+        }
+
+        .blob.surprised .eye {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+        }
+
+        .blob.surprised .pupil {
+            width: 22px;
+            height: 22px;
+        }
+
+        .blob.surprised .mouth {
+            opacity: 1;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.8);
+            bottom: 30px;
+        }
+
+        /* Blob 1 - Big surprise */
+        .blob-1.surprised .eye {
+            width: 50px;
+            height: 50px;
+        }
+
+        /* Blob 2 - Caught off guard */
+        .blob-2.surprised .eye {
+            width: 44px;
+            height: 44px;
+        }
+
+        /* Blob 3 - Shocked wide */
+        .blob-3.surprised .eye {
+            width: 52px;
+            height: 48px;
+        }
+
+        .blob-3.surprised .mouth {
+            width: 35px;
+            height: 35px;
+        }
+
+        /* Blob 4 - Subtle surprise */
+        .blob-4.surprised .eye {
+            width: 42px;
+            height: 52px;
+        }
+
+        .blob.nervous {
+            animation: shake 0.3s ease;
+        }
+
+        .blob.nervous .eye {
+            animation: blink 0.15s ease 2;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-8px);
+            }
+
+            75% {
+                transform: translateX(8px);
+            }
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                transform: scaleY(1);
+            }
+
+            50% {
+                transform: scaleY(0.1);
+            }
+        }
+
+        .blob.typing .eyes {
+            animation: lookDown 0.5s ease forwards;
+        }
+
+        @keyframes lookDown {
+            to {
+                transform: translateY(8px);
+            }
+        }
+
+        .login-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            padding: 50px 45px;
+            border-radius: 30px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 420px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .brand-subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 35px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            font-weight: 500;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        input:focus {
+            border-color: #4ecdc4;
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 4px rgba(78, 205, 196, 0.15),
+                0 8px 20px rgba(78, 205, 196, 0.2);
+            transform: translateY(-2px);
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            margin-top: 15px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.5);
+            background: linear-gradient(135deg, #ff7b7b 0%, #ff6a7f 100%);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .forgot-password a {
+            color: #4ecdc4;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .forgot-password a:hover {
+            color: #6ee7db;
+            text-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+        }
+
+        .guest-btn {
+            background: transparent;
+            border: 2px solid #4ecdc4;
+            color: #4ecdc4;
+            box-shadow: none;
+        }
+
+        .guest-btn:hover {
+            background: rgba(78, 205, 196, 0.15);
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+            border-color: #6ee7db;
+            color: #6ee7db;
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-brand">
-            <div class="brand-icon">▲</div>
-            <span class="brand-text">AniVerse</span>
-        </div>
-        <div class="nav-links">
-            <!-- Mode Toggle -->
-            <div class="mode-toggle" id="modeToggle">
-                <button class="mode-btn active" data-mode="anime" onclick="switchMode('anime')">Anime</button>
-                <button class="mode-btn" data-mode="manga" onclick="switchMode('manga')">Manga</button>
-            </div>
-            <div class="nav-divider"></div>
-            <a href="#" class="nav-link active" data-view="discover"
-                onclick="loadCurrentMode(); return false;">Discover</a>
-            <a href="#" class="nav-link" data-view="top-rated" onclick="loadTopRated(); return false;">Top Rated</a>
-            <a href="#" class="nav-link" data-view="popular" onclick="loadPopular(); return false;">Popular</a>
-            <a href="#" class="nav-link" data-view="genres" onclick="showGenreFilter(); return false;">Genres</a>
-        </div>
-        <div class="nav-actions">
-            <div class="keyboard-hint" title="Press / to search">
-                <kbd>/</kbd>
-            </div>
-            <button class="btn-theme" id="themeToggle" title="Toggle theme (T)">
-                <span class="theme-icon">◐</span>
-            </button>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-bg"></div>
-        <div class="hero-content">
-            <h1 class="hero-title">
-                <span>Find anime that</span>
-                <span>matches your <span class="highlight">vibe</span></span>
-            </h1>
-            <p class="hero-subtitle">
-                Describe a mood, a scene, or a feeling. Our AI understands what you mean.
-            </p>
-
-            <!-- Search Box -->
-            <div class="search-container">
-                <div class="search-box">
-                    <span class="search-icon">⌕</span>
-                    <input type="text" id="searchInput" class="search-input"
-                        placeholder="dark thriller with genius protagonist..." autocomplete="off">
-                    <button class="search-btn" id="searchBtn">Search</button>
-                </div>
-                <div class="search-examples">
-                    <span>Try:</span>
-                    <button class="example-chip" data-query="anime with rooftop confession scene">rooftop
-                        confession</button>
-                    <button class="example-chip" data-query="epic training arc underdog">training arc</button>
-                    <button class="example-chip" data-query="isekai overpowered protagonist">isekai OP MC</button>
-                    <button class="example-chip" data-query="melancholic bittersweet ending">bittersweet</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Quick Stats Bar -->
-    <div class="stats-bar" id="statsBar">
-        <div class="stat-item">
-            <span class="stat-value" id="statTotal">20,654</span>
-            <span class="stat-label">Anime Indexed</span>
-        </div>
-        <div class="stat-item">
-            <span class="stat-value" id="statGenres">40+</span>
-            <span class="stat-label">Genres</span>
-        </div>
-        <div class="stat-item">
-            <span class="stat-value" id="statScenes">25+</span>
-            <span class="stat-label">Scene Types</span>
-        </div>
-    </div>
-
-    <!-- Results Section -->
-    <section class="results-section" id="resultsSection">
-        <div class="results-header">
-            <h2 class="results-title" id="resultsTitle">Top Rated</h2>
-            <span class="results-count" id="resultsCount"></span>
-            <div class="results-actions">
-                <button class="view-toggle active" data-view="grid" title="Grid view">▦</button>
-                <button class="view-toggle" data-view="list" title="List view">☰</button>
-            </div>
-        </div>
-        <div class="anime-grid" id="animeGrid">
-            <!-- Skeleton loading -->
-            <div class="skeleton-grid" id="skeletonGrid">
-                <div class="skeleton-card">
-                    <div class="skeleton-image"></div>
-                    <div class="skeleton-text"></div>
-                    <div class="skeleton-text short"></div>
-                </div>
-                <div class="skeleton-card">
-                    <div class="skeleton-image"></div>
-                    <div class="skeleton-text"></div>
-                    <div class="skeleton-text short"></div>
-                </div>
-                <div class="skeleton-card">
-                    <div class="skeleton-image"></div>
-                    <div class="skeleton-text"></div>
-                    <div class="skeleton-text short"></div>
-                </div>
-                <div class="skeleton-card">
-                    <div class="skeleton-image"></div>
-                    <div class="skeleton-text"></div>
-                    <div class="skeleton-text short"></div>
-                </div>
-                <div class="skeleton-card">
-                    <div class="skeleton-image"></div>
-                    <div class="skeleton-text"></div>
-                    <div class="skeleton-text short"></div>
-                </div>
-                <div class="skeleton-card">
-                    <div class="skeleton-image"></div>
-                    <div class="skeleton-text"></div>
-                    <div class="skeleton-text short"></div>
-                </div>
-            </div>
-            <!-- Loading state (hidden by default) -->
-            <div class="loading-state" id="loadingState" style="display: none;">
-                <div class="loader"></div>
-                <p>Finding anime...</p>
-            </div>
-            <!-- Empty state -->
-            <div class="empty-state" id="emptyState" style="display: none;">
-                <span class="empty-icon">∅</span>
-                <p>No results found</p>
-                <button class="btn-secondary" onclick="loadInitialData()">Show Top Rated</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Anime Detail Modal -->
-    <div class="modal" id="animeModal">
-        <div class="modal-backdrop" id="modalBackdrop"></div>
-        <div class="modal-content" id="modalContent">
-            <button class="modal-close" id="modalClose" title="Close (Esc)">×</button>
-            <div class="modal-body" id="modalBody"></div>
-        </div>
-    </div>
-
-    <!-- AI Chat Panel -->
-    <div class="chat-panel" id="chatPanel">
-        <div class="chat-header">
-            <span class="chat-title">AI Assistant</span>
-            <div class="chat-header-actions">
-                <button class="chat-toggle" id="chatToggle" title="Toggle (C)">−</button>
-            </div>
-        </div>
-        <div class="chat-body" id="chatBody">
-            <div class="chat-messages" id="chatMessages">
-                <div class="chat-message assistant">
-                    <p>Hey! I can help you find anime and manage your list.</p>
-                    <p class="chat-hint-text">Try: "Add Death Note to completed with rating 10"</p>
-                </div>
-            </div>
-            <div class="chat-input-container">
-                <input type="text" id="chatInput" class="chat-input" placeholder="Ask anything...">
-                <button class="chat-send" id="chatSend">→</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notifications -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <!-- Keyboard Shortcuts Modal -->
-    <div class="shortcuts-modal" id="shortcutsModal">
-        <div class="shortcuts-content">
-            <h3>Keyboard Shortcuts</h3>
-            <div class="shortcut-row"><kbd>/</kbd><span>Focus search</span></div>
-            <div class="shortcut-row"><kbd>C</kbd><span>Toggle chat</span></div>
-            <div class="shortcut-row"><kbd>T</kbd><span>Toggle theme</span></div>
-            <div class="shortcut-row"><kbd>Esc</kbd><span>Close modal</span></div>
-            <div class="shortcut-row"><kbd>?</kbd><span>Show shortcuts</span></div>
-            <button class="btn-close" onclick="document.getElementById('shortcutsModal').classList.remove('active')">Got
-                it</button>
-        </div>
-    </div>
-
-    <!-- MAL Import Modal -->
-    <div class="import-modal" id="importModal">
-        <div class="import-backdrop" onclick="closeImportModal()"></div>
-        <div class="import-content">
-            <button class="modal-close" onclick="closeImportModal()">✕</button>
-            <h2>🔄 Import from MyAnimeList</h2>
-            <p class="import-subtitle">Bring your anime list to AniVerse</p>
-
-            <div class="import-options">
-                <!-- Option 1: OAuth -->
-                <div class="import-option">
-                    <div class="option-header">
-                        <span class="option-icon">🔗</span>
-                        <h3>Connect MAL Account</h3>
-                        <span class="option-badge recommended">Recommended</span>
+    <div class="container">
+        <div class="blobs-container">
+            <!-- Orange Blob -->
+            <div class="blob blob-1" id="blob1">
+                <div class="eyes">
+                    <div class="eye">
+                        <div class="pupil" data-blob="1" data-eye="1"></div>
                     </div>
-                    <p>Automatically sync your list by connecting your MAL account.</p>
-                    <button class="btn-import-primary" onclick="startMALOAuth()">
-                        Connect to MyAnimeList →
-                    </button>
+                    <div class="eye">
+                        <div class="pupil" data-blob="1" data-eye="2"></div>
+                    </div>
                 </div>
-
-                <div class="import-divider"><span>OR</span></div>
-
-                <!-- Option 2: XML Upload -->
-                <div class="import-option">
-                    <div class="option-header">
-                        <span class="option-icon">📁</span>
-                        <h3>Upload XML Export</h3>
-                    </div>
-                    <p>Import from an XML file exported from MAL.</p>
-
-                    <div class="import-instructions">
-                        <h4>📋 How to export from MAL:</h4>
-                        <ol>
-                            <li>Go to <a href="https://myanimelist.net/panel.php?go=export" target="_blank">MAL Export
-                                    Page</a></li>
-                            <li>Click <strong>"Export My Anime List"</strong></li>
-                            <li>Download the XML file</li>
-                            <li>Upload it below</li>
-                        </ol>
-                    </div>
-
-                    <div class="file-upload-zone" id="uploadZone">
-                        <input type="file" id="xmlFileInput" accept=".xml,.gz" hidden>
-                        <span class="upload-icon">📤</span>
-                        <p>Drop your XML file here or <button
-                                onclick="document.getElementById('xmlFileInput').click()">browse</button></p>
-                        <span class="file-name" id="fileName"></span>
-                    </div>
-                    <button class="btn-import-secondary" id="uploadBtn" onclick="uploadMALXml()" disabled>
-                        Upload & Import
-                    </button>
-                </div>
+                <div class="mouth"></div>
+                <div class="hand hand-left"></div>
+                <div class="hand hand-right"></div>
             </div>
 
-            <div class="import-progress" id="importProgress" style="display: none;">
-                <div class="progress-bar">
-                    <div class="progress-fill"></div>
+            <!-- Purple Blob -->
+            <div class="blob blob-2" id="blob2">
+                <div class="eyes">
+                    <div class="eye">
+                        <div class="pupil" data-blob="2" data-eye="1"></div>
+                    </div>
+                    <div class="eye">
+                        <div class="pupil" data-blob="2" data-eye="2"></div>
+                    </div>
                 </div>
-                <p id="importStatus">Importing your anime list...</p>
+                <div class="mouth"></div>
+                <div class="hand hand-left"></div>
+                <div class="hand hand-right"></div>
             </div>
+
+            <!-- Yellow Blob -->
+            <div class="blob blob-3" id="blob3">
+                <div class="eyes">
+                    <div class="eye">
+                        <div class="pupil" data-blob="3" data-eye="1"></div>
+                    </div>
+                    <div class="eye">
+                        <div class="pupil" data-blob="3" data-eye="2"></div>
+                    </div>
+                </div>
+                <div class="mouth"></div>
+                <div class="hand hand-left"></div>
+                <div class="hand hand-right"></div>
+            </div>
+
+            <!-- Teal Blob -->
+            <div class="blob blob-4" id="blob4">
+                <div class="eyes">
+                    <div class="eye">
+                        <div class="pupil" data-blob="4" data-eye="1"></div>
+                    </div>
+                    <div class="eye">
+                        <div class="pupil" data-blob="4" data-eye="2"></div>
+                    </div>
+                </div>
+                <div class="mouth"></div>
+                <div class="hand hand-left"></div>
+                <div class="hand hand-right"></div>
+            </div>
+        </div>
+
+        <div class="login-box">
+            <h2>▲ AniVerse</h2>
+            <p class="brand-subtitle">Discover anime that matches your vibe</p>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit">Sign In</button>
+                <button type="button" id="guestBtn" class="guest-btn">Continue as Guest</button>
+                <div class="forgot-password">
+                    <a href="#">Don't have an account? Sign up</a>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- Genre Filter Modal -->
-    <div class="genre-modal" id="genreModal">
-        <div class="genre-backdrop" onclick="closeGenreModal()"></div>
-        <div class="genre-content">
-            <button class="modal-close" onclick="closeGenreModal()">✕</button>
-            <h3>Filter by Genre</h3>
-            <div class="genre-grid" id="genreGrid">
-                <!-- Genres loaded dynamically -->
-            </div>
-        </div>
-    </div>
+    <script>
+        const blobs = [
+            document.getElementById('blob1'),
+            document.getElementById('blob2'),
+            document.getElementById('blob3'),
+            document.getElementById('blob4')
+        ];
 
-    <script src="components/app.js?v=5"></script>
+        const allPupils = document.querySelectorAll('.pupil');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginForm = document.getElementById('loginForm');
+
+        let currentFocus = null;
+        let typingTimer = null;
+
+        // Track mouse movement for eye following
+        document.addEventListener('mousemove', (e) => {
+            if (currentFocus !== 'password') {
+                moveAllEyes(e.clientX, e.clientY);
+            }
+        });
+
+        function moveAllEyes(targetX, targetY) {
+            allPupils.forEach(pupil => {
+                const blobId = pupil.getAttribute('data-blob');
+                const blob = document.getElementById(`blob${blobId}`);
+                const blobRect = blob.getBoundingClientRect();
+                const centerX = blobRect.left + blobRect.width / 2;
+                const centerY = blobRect.top + blobRect.height / 2;
+
+                const angle = Math.atan2(targetY - centerY, targetX - centerX);
+                const distance = Math.min(8, Math.hypot(targetX - centerX, targetY - centerY) / 30);
+                const pupilX = Math.cos(angle) * distance;
+                const pupilY = Math.sin(angle) * distance;
+
+                pupil.style.transform = `translate(calc(-50% + ${pupilX}px), calc(-50% + ${pupilY}px))`;
+            });
+        }
+
+        // React to username input
+        usernameInput.addEventListener('focus', () => {
+            currentFocus = 'username';
+
+            // Different reactions for each blob
+            blobs[0].classList.add('happy');
+            setTimeout(() => blobs[1].classList.add('surprised'), 100);
+            setTimeout(() => blobs[2].classList.add('happy'), 200);
+            setTimeout(() => blobs[3].classList.add('surprised'), 300);
+
+            blobs.forEach(blob => blob.classList.add('typing'));
+
+            // Look at the username field
+            const inputRect = usernameInput.getBoundingClientRect();
+            const inputX = inputRect.left + inputRect.width / 2;
+            const inputY = inputRect.top + inputRect.height / 2;
+            moveAllEyes(inputX, inputY);
+
+            // Reset after animation
+            setTimeout(() => {
+                blobs.forEach(blob => {
+                    blob.classList.remove('happy', 'surprised');
+                });
+            }, 800);
+        });
+
+        usernameInput.addEventListener('blur', () => {
+            if (currentFocus === 'username') {
+                currentFocus = null;
+            }
+            blobs.forEach(blob => {
+                blob.classList.remove('happy', 'typing', 'surprised');
+            });
+        });
+
+        usernameInput.addEventListener('input', () => {
+            clearTimeout(typingTimer);
+
+            const length = usernameInput.value.length;
+
+            // Rotating reactions for different blobs
+            const blobIndex = length % 4;
+            blobs[blobIndex].classList.add('surprised');
+
+            setTimeout(() => {
+                blobs[blobIndex].classList.remove('surprised');
+            }, 300);
+
+            // Occasional happy wiggle
+            if (length > 0 && length % 5 === 0) {
+                const randomBlob = blobs[Math.floor(Math.random() * 4)];
+                randomBlob.classList.add('happy');
+                setTimeout(() => randomBlob.classList.remove('happy'), 600);
+            }
+        });
+
+        // React to password input - cover eyes for privacy!
+        passwordInput.addEventListener('focus', () => {
+            currentFocus = 'password';
+
+            // Staggered nervous reaction, but blob 2 (purple) is sneaky!
+            blobs.forEach((blob, index) => {
+                setTimeout(() => {
+                    blob.classList.add('nervous');
+                    setTimeout(() => {
+                        blob.classList.remove('nervous');
+                        // Purple blob (index 1) turns around and peeks!
+                        if (index !== 1) {
+                            blob.classList.add('covering');
+                        } else {
+                            // Sneaky blob turns around
+                            blob.classList.add('sneaky');
+
+                            // Make eyes look to the corner (sneaky side-eye)
+                            setTimeout(() => {
+                                const sneakyPupils = blob.querySelectorAll('.pupil');
+                                sneakyPupils.forEach((pupil, pIndex) => {
+                                    // Look to the right corner (toward password)
+                                    const pupilX = pIndex === 0 ? -10 : -10;
+                                    const pupilY = -3;
+                                    pupil.style.transform = `translate(calc(-50% + ${pupilX}px), calc(-50% + ${pupilY}px))`;
+                                });
+                            }, 400);
+                        }
+                    }, 300);
+                }, index * 100);
+            });
+        });
+
+        passwordInput.addEventListener('blur', () => {
+            if (currentFocus === 'password') {
+                currentFocus = null;
+            }
+
+            // Remove sneaky behavior
+            blobs[1].classList.remove('sneaky');
+
+            // Peek before uncovering - staggered
+            blobs.forEach((blob, index) => {
+                setTimeout(() => {
+                    blob.classList.remove('covering');
+                    blob.classList.add('surprised');
+
+                    setTimeout(() => {
+                        blob.classList.remove('surprised');
+                    }, 500);
+                }, index * 80);
+            });
+        });
+
+        passwordInput.addEventListener('input', () => {
+            // Random nervous shakes while entering password (only covered blobs)
+            if (passwordInput.value.length % 2 === 0) {
+                const coveredBlobs = blobs.filter((_, index) => index !== 1);
+                const randomBlob = coveredBlobs[Math.floor(Math.random() * coveredBlobs.length)];
+                randomBlob.classList.add('nervous');
+                setTimeout(() => randomBlob.classList.remove('nervous'), 300);
+            }
+
+            // Sneaky blob reacts to what it sees (pupils move slightly)
+            if (passwordInput.value.length % 3 === 0 && passwordInput.value.length > 0) {
+                const sneakyPupils = blobs[1].querySelectorAll('.pupil');
+                sneakyPupils.forEach(pupil => {
+                    // Quick glance animation
+                    pupil.style.transform = `translate(calc(-50% + ${-12}px), calc(-50% + ${-5}px))`;
+                    setTimeout(() => {
+                        pupil.style.transform = `translate(calc(-50% + ${-10}px), calc(-50% + ${-3}px))`;
+                    }, 200);
+                });
+            }
+        });
+
+        // Handle form submission
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // Remove covering and show excitement
+            blobs.forEach(blob => blob.classList.remove('covering'));
+
+            setTimeout(() => {
+                // Wave of happiness
+                blobs.forEach((blob, index) => {
+                    setTimeout(() => {
+                        blob.classList.add('happy');
+                        setTimeout(() => {
+                            blob.classList.add('surprised');
+                        }, 300);
+                    }, index * 150);
+                });
+            }, 200);
+
+            setTimeout(() => {
+                // Redirect to main app
+                window.location.href = 'app.html';
+            }, 1200);
+        });
+
+        // Guest login handler
+        document.getElementById('guestBtn').addEventListener('click', () => {
+            // Fun animation for guest login
+            blobs.forEach((blob, index) => {
+                setTimeout(() => {
+                    blob.classList.add('happy');
+                }, index * 100);
+            });
+
+            setTimeout(() => {
+                window.location.href = 'app.html';
+            }, 600);
+        });
+
+        // Initial eye position - looking at login box
+        setTimeout(() => {
+            const loginBoxRect = document.querySelector('.login-box').getBoundingClientRect();
+            moveAllEyes(loginBoxRect.left + loginBoxRect.width / 2, loginBoxRect.top + loginBoxRect.height / 2);
+        }, 100);
+
+        // Add random blinks to different blobs
+        setInterval(() => {
+            const randomBlob = blobs[Math.floor(Math.random() * 4)];
+            randomBlob.classList.add('nervous');
+            setTimeout(() => randomBlob.classList.remove('nervous'), 150);
+        }, 3000 + Math.random() * 2000);
+
+        // Random expressions when idle
+        setInterval(() => {
+            if (!currentFocus) {
+                const randomBlob = blobs[Math.floor(Math.random() * 4)];
+                const expressions = ['happy', 'surprised'];
+                const randomExpression = expressions[Math.floor(Math.random() * expressions.length)];
+
+                randomBlob.classList.add(randomExpression);
+                setTimeout(() => {
+                    randomBlob.classList.remove(randomExpression);
+                }, 800);
+            }
+        }, 5000 + Math.random() * 3000);
+    </script>
 </body>
 
 </html>
