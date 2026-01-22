@@ -16,23 +16,33 @@ class AnimeVectorStore:
     def __init__(self, persist_directory: str = None):
         self.persist_dir = persist_directory or str(CHROMA_DB_PATH)
         
-        # Initialize ChromaDB client
-        self.client = chromadb.PersistentClient(
-            path=self.persist_dir,
-            settings=Settings(anonymized_telemetry=False)
-        )
-        
-        # Use ChromaDB's default embedding function (no PyTorch needed)
-        self.embedding_fn = embedding_functions.DefaultEmbeddingFunction()
-        
-        # Get or create anime collection with embedding function
-        self.collection = self.client.get_or_create_collection(
-            name="anime",
-            metadata={"hnsw:space": "cosine"},
-            embedding_function=self.embedding_fn
-        )
-        
-        print(f"Vector store initialized at {self.persist_dir}")
+        try:
+            # Initialize ChromaDB client with telemetry disabled
+            self.client = chromadb.PersistentClient(
+                path=self.persist_dir,
+                settings=Settings(
+                    anonymized_telemetry=False,
+                    allow_reset=True
+                )
+            )
+            
+            # Use ChromaDB's default embedding function
+            self.embedding_fn = embedding_functions.DefaultEmbeddingFunction()
+            
+            # Get or create anime collection with embedding function
+            self.collection = self.client.get_or_create_collection(
+                name="anime",
+                metadata={"hnsw:space": "cosine"},
+                embedding_function=self.embedding_fn
+            )
+            
+            print(f"Vector store initialized at {self.persist_dir}")
+            print(f"Collection count: {self.collection.count()}")
+        except Exception as e:
+            print(f"ERROR initializing vector store: {e}")
+            import traceback
+            traceback.print_exc()
+            raise
     
     def add_anime(
         self,
