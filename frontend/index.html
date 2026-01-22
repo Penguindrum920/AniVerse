@@ -802,9 +802,9 @@
             });
         }
 
-        // React to username input
-        usernameInput.addEventListener('focus', () => {
-            currentFocus = 'username';
+        // React to identifier input (email/username field)
+        identifierInput.addEventListener('focus', () => {
+            currentFocus = 'identifier';
 
             // Different reactions for each blob
             blobs[0].classList.add('happy');
@@ -814,8 +814,8 @@
 
             blobs.forEach(blob => blob.classList.add('typing'));
 
-            // Look at the username field
-            const inputRect = usernameInput.getBoundingClientRect();
+            // Look at the identifier field
+            const inputRect = identifierInput.getBoundingClientRect();
             const inputX = inputRect.left + inputRect.width / 2;
             const inputY = inputRect.top + inputRect.height / 2;
             moveAllEyes(inputX, inputY);
@@ -828,8 +828,8 @@
             }, 800);
         });
 
-        usernameInput.addEventListener('blur', () => {
-            if (currentFocus === 'username') {
+        identifierInput.addEventListener('blur', () => {
+            if (currentFocus === 'identifier') {
                 currentFocus = null;
             }
             blobs.forEach(blob => {
@@ -837,10 +837,10 @@
             });
         });
 
-        usernameInput.addEventListener('input', () => {
+        identifierInput.addEventListener('input', () => {
             clearTimeout(typingTimer);
 
-            const length = usernameInput.value.length;
+            const length = identifierInput.value.length;
 
             // Rotating reactions for different blobs
             const blobIndex = length % 4;
