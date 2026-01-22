@@ -24,7 +24,7 @@ class RegisterRequest(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    email: str
+    identifier: str  # Can be email or username
     password: str
 
 
@@ -114,11 +114,14 @@ async def register(request: RegisterRequest, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=TokenResponse)
 async def login(request: LoginRequest, db: Session = Depends(get_db)):
-    """Login with email and password"""
-    user = db.query(User).filter(User.email == request.email).first()
+    """Login with email or username and password"""
+    # Try to find user by email first, then by username
+    user = db.query(User).filter(User.email == request.identifier).first()
+    if not user:
+        user = db.query(User).filter(User.username == request.identifier).first()
     
     if not user or not verify_password(request.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+        raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Generate token
     token = create_access_token({"sub": str(user.id)})

@@ -711,22 +711,52 @@
             </div>
         </div>
 
-        <div class="login-box">
+        <div class="login-box" id="loginBox">
             <h2>▲ AniVerse</h2>
             <p class="brand-subtitle">Discover anime that matches your vibe</p>
+            <div id="errorMessage"
+                style="display:none; color:#ff6b6b; text-align:center; margin-bottom:15px; font-size:14px;"></div>
             <form id="loginForm">
                 <div class="input-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                    <label for="identifier">Email or Username</label>
+                    <input type="text" id="identifier" name="identifier" placeholder="Enter email or username" required>
                 </div>
                 <div class="input-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" name="password" placeholder="Enter your password" required>
                 </div>
-                <button type="submit">Sign In</button>
+                <button type="submit" id="loginBtn">Sign In</button>
                 <button type="button" id="guestBtn" class="guest-btn">Continue as Guest</button>
                 <div class="forgot-password">
-                    <a href="#">Don't have an account? Sign up</a>
+                    <a href="#" id="showSignup">Don't have an account? Sign up</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Signup Modal -->
+        <div class="login-box" id="signupBox" style="display:none;">
+            <h2>▲ Create Account</h2>
+            <p class="brand-subtitle">Join the anime community</p>
+            <div id="signupError"
+                style="display:none; color:#ff6b6b; text-align:center; margin-bottom:15px; font-size:14px;"></div>
+            <form id="signupForm">
+                <div class="input-group">
+                    <label for="signupEmail">Email</label>
+                    <input type="email" id="signupEmail" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="input-group">
+                    <label for="signupUsername">Username</label>
+                    <input type="text" id="signupUsername" name="username" placeholder="Choose a username" required
+                        minlength="3">
+                </div>
+                <div class="input-group">
+                    <label for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" name="password" placeholder="Create a password" required
+                        minlength="6">
+                </div>
+                <button type="submit" id="signupBtn">Create Account</button>
+                <div class="forgot-password">
+                    <a href="#" id="showLogin">Already have an account? Sign in</a>
                 </div>
             </form>
         </div>
@@ -741,7 +771,7 @@
         ];
 
         const allPupils = document.querySelectorAll('.pupil');
-        const usernameInput = document.getElementById('username');
+        const identifierInput = document.getElementById('identifier');
         const passwordInput = document.getElementById('password');
         const loginForm = document.getElementById('loginForm');
 
@@ -904,33 +934,134 @@
             }
         });
 
-        // Handle form submission
-        loginForm.addEventListener('submit', (e) => {
+        // API Configuration
+        const API_BASE = 'https://aniverse-production.up.railway.app';
+
+        // Show error message
+        function showError(elementId, message) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 5000);
+        }
+
+        // Toggle between login and signup forms
+        document.getElementById('showSignup').addEventListener('click', (e) => {
             e.preventDefault();
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('signupBox').style.display = 'block';
+        });
 
-            // Remove covering and show excitement
-            blobs.forEach(blob => blob.classList.remove('covering'));
+        document.getElementById('showLogin').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('signupBox').style.display = 'none';
+            document.getElementById('loginBox').style.display = 'block';
+        });
 
-            setTimeout(() => {
-                // Wave of happiness
-                blobs.forEach((blob, index) => {
-                    setTimeout(() => {
-                        blob.classList.add('happy');
-                        setTimeout(() => {
-                            blob.classList.add('surprised');
-                        }, 300);
-                    }, index * 150);
+        // Handle login form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const identifier = document.getElementById('identifier').value;
+            const password = passwordInput.value;
+            const loginBtn = document.getElementById('loginBtn');
+
+            loginBtn.textContent = 'Signing in...';
+            loginBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ identifier, password })
                 });
-            }, 200);
 
-            setTimeout(() => {
-                // Redirect to main app
-                window.location.href = 'app.html';
-            }, 1200);
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Save token and user data
+                    localStorage.setItem('aniverse_token', data.access_token);
+                    localStorage.setItem('aniverse_user', JSON.stringify(data.user));
+
+                    // Show happy animation
+                    blobs.forEach(blob => blob.classList.remove('covering'));
+                    blobs.forEach((blob, index) => {
+                        setTimeout(() => {
+                            blob.classList.add('happy');
+                        }, index * 150);
+                    });
+
+                    // Redirect to main app
+                    setTimeout(() => {
+                        window.location.href = 'app.html';
+                    }, 800);
+                } else {
+                    showError('errorMessage', data.detail || 'Login failed. Please check your credentials.');
+                    blobs.forEach(blob => blob.classList.add('nervous'));
+                    setTimeout(() => blobs.forEach(blob => blob.classList.remove('nervous')), 500);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('errorMessage', 'Connection failed. Please try again.');
+            } finally {
+                loginBtn.textContent = 'Sign In';
+                loginBtn.disabled = false;
+            }
+        });
+
+        // Handle signup form submission
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('signupEmail').value;
+            const username = document.getElementById('signupUsername').value;
+            const password = document.getElementById('signupPassword').value;
+            const signupBtn = document.getElementById('signupBtn');
+
+            signupBtn.textContent = 'Creating account...';
+            signupBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Save token and user data
+                    localStorage.setItem('aniverse_token', data.access_token);
+                    localStorage.setItem('aniverse_user', JSON.stringify(data.user));
+
+                    // Show happy animation
+                    blobs.forEach((blob, index) => {
+                        setTimeout(() => {
+                            blob.classList.add('happy');
+                        }, index * 100);
+                    });
+
+                    // Redirect to main app
+                    setTimeout(() => {
+                        window.location.href = 'app.html';
+                    }, 800);
+                } else {
+                    showError('signupError', data.detail || 'Registration failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                showError('signupError', 'Connection failed. Please try again.');
+            } finally {
+                signupBtn.textContent = 'Create Account';
+                signupBtn.disabled = false;
+            }
         });
 
         // Guest login handler
         document.getElementById('guestBtn').addEventListener('click', () => {
+            // Clear any existing auth
+            localStorage.removeItem('aniverse_token');
+            localStorage.removeItem('aniverse_user');
+
             // Fun animation for guest login
             blobs.forEach((blob, index) => {
                 setTimeout(() => {
