@@ -34,54 +34,99 @@ def download_folder_from_gdrive(folder_id: str, output_dir: str):
         return True
     except Exception as e:
         print(f"Error downloading: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 def organize_downloaded_files(download_dir: Path, backend_dir: Path):
     """Move downloaded files to correct locations"""
-    print("Organizing downloaded files...")
+    print(f"\n{'='*50}")
+    print("ORGANIZING DOWNLOADED FILES")
+    print(f"{'='*50}")
+    print(f"Source: {download_dir}")
+    print(f"Destination: {backend_dir}")
     
     if not download_dir.exists():
-        print(f"Download directory {download_dir} does not exist")
+        print(f"ERROR: Download directory {download_dir} does not exist!")
         return False
     
     # List all downloaded items
-    for item in download_dir.iterdir():
-        print(f"  Found: {item.name}")
+    items = list(download_dir.iterdir())
+    print(f"Found {len(items)} items in download folder:")
+    
+    for item in items:
+        print(f"\n  Processing: {item.name} (is_dir={item.is_dir()})")
         
-        # Move CSV files to dataset folder
-        if item.suffix == '.csv':
-            dataset_dir = backend_dir / "dataset"
-            dataset_dir.mkdir(parents=True, exist_ok=True)
-            dest = dataset_dir / item.name
-            print(f"    Moving to {dest}")
-            shutil.move(str(item), str(dest))
-        
-        # Move chroma_db folder
-        elif item.name == 'chroma_db' and item.is_dir():
-            dest = backend_dir / "chroma_db"
-            if dest.exists():
-                shutil.rmtree(dest)
-            print(f"    Moving to {dest}")
-            shutil.move(str(item), str(dest))
-        
-        # Move manga_chroma_db folder
-        elif item.name == 'manga_chroma_db' and item.is_dir():
-            dest = backend_dir / "manga_chroma_db"
-            if dest.exists():
-                shutil.rmtree(dest)
-            print(f"    Moving to {dest}")
-            shutil.move(str(item), str(dest))
-        
-        # Handle nested directories (in case GDrive creates them)
-        elif item.is_dir():
-            print(f"    Recursively processing subdirectory: {item.name}")
-            organize_downloaded_files(item, backend_dir)
+        try:
+            # Move CSV files to dataset folder
+            if item.suffix.lower() == '.csv':
+                dataset_dir = backend_dir / "dataset"
+                dataset_dir.mkdir(parents=True, exist_ok=True)
+                dest = dataset_dir / item.name
+                print(f"    Moving CSV to {dest}")
+                shutil.move(str(item), str(dest))
+                print(f"    ✓ Moved successfully")
+            
+            # Move chroma_db folder
+            elif item.name == 'chroma_db' and item.is_dir():
+                dest = backend_dir / "chroma_db"
+                if dest.exists():
+                    print(f"    Removing existing {dest}")
+                    shutil.rmtree(dest)
+                print(f"    Moving chroma_db to {dest}")
+                shutil.move(str(item), str(dest))
+                print(f"    ✓ Moved successfully")
+            
+            # Move manga_chroma_db folder
+            elif item.name == 'manga_chroma_db' and item.is_dir():
+                dest = backend_dir / "manga_chroma_db"
+                if dest.exists():
+                    print(f"    Removing existing {dest}")
+                    shutil.rmtree(dest)
+                print(f"    Moving manga_chroma_db to {dest}")
+                shutil.move(str(item), str(dest))
+                print(f"    ✓ Moved successfully")
+            
+            # Handle nested directories (GDrive sometimes creates nested folders)
+            elif item.is_dir():
+                print(f"    Recursively processing subdirectory: {item.name}")
+                organize_downloaded_files(item, backend_dir)
+        except Exception as e:
+            print(f"    ERROR moving {item.name}: {e}")
+            import traceback
+            traceback.print_exc()
     
     return True
+
+def verify_data(backend_dir: Path):
+    """Verify all required data files exist"""
+    print(f"\n{'='*50}")
+    print("VERIFYING DATA FILES")
+    print(f"{'='*50}")
+    
+    dataset_path = backend_dir / "dataset" / "anime.csv"
+    chroma_path = backend_dir / "chroma_db"
+    manga_chroma_path = backend_dir / "manga_chroma_db"
+    
+    print(f"Dataset (anime.csv): {dataset_path.exists()} - {dataset_path}")
+    print(f"ChromaDB: {chroma_path.exists()} - {chroma_path}")
+    print(f"Manga ChromaDB: {manga_chroma_path.exists()} - {manga_chroma_path}")
+    
+    if chroma_path.exists():
+        print(f"  ChromaDB contents: {list(chroma_path.iterdir())}")
+    if manga_chroma_path.exists():
+        print(f"  Manga ChromaDB contents: {list(manga_chroma_path.iterdir())}")
+    
+    return dataset_path.exists() and chroma_path.exists()
 
 def setup_data():
     """Download all required data files"""
     backend_dir = Path(__file__).parent
+    
+    print(f"\n{'='*50}")
+    print("ANIVERSE DATA SETUP")
+    print(f"{'='*50}")
+    print(f"Backend directory: {backend_dir}")
     
     # Check if data already exists
     dataset_dir = backend_dir / "dataset"
@@ -95,12 +140,13 @@ def setup_data():
     
     if dataset_exists and chroma_exists:
         print("All data files present, skipping download.")
+        verify_data(backend_dir)
         return True
     
     # Download from GDrive
-    print("=" * 50)
+    print(f"\n{'='*50}")
     print("DOWNLOADING DATA FROM GOOGLE DRIVE")
-    print("=" * 50)
+    print(f"{'='*50}")
     
     download_dir = backend_dir / "data_download"
     success = download_folder_from_gdrive(GDRIVE_FOLDER_ID, str(download_dir))
@@ -110,11 +156,20 @@ def setup_data():
         
         # Cleanup download folder
         if download_dir.exists():
-            shutil.rmtree(download_dir)
-            print("Cleaned up download folder")
+            print(f"\nCleaning up download folder: {download_dir}")
+            try:
+                shutil.rmtree(download_dir)
+                print("✓ Cleanup complete")
+            except Exception as e:
+                print(f"Warning: Could not cleanup: {e}")
+        
+        # Verify the data
+        verify_data(backend_dir)
     else:
+        print("\n" + "!"*50)
         print("WARNING: Failed to download data from GDrive!")
         print("The server may not function correctly without data files.")
+        print("!"*50)
     
     return success
 
