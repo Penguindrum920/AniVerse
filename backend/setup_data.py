@@ -1,18 +1,12 @@
 """Download datasets and embeddings from Google Drive on startup"""
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 # Google Drive folder ID (extracted from the share link)
 GDRIVE_FOLDER_ID = "1tvoY4Ks3elgRgC81uRsZRDhDcclmu5hO"
-
-# Files to download with their GDrive file IDs
-# You'll need to get individual file IDs from GDrive
-GDRIVE_FILES = {
-    # Format: "local_path": "gdrive_file_id"
-    # These will be filled in once you share the individual files
-}
 
 def install_gdown():
     """Install gdown if not present"""
@@ -42,6 +36,49 @@ def download_folder_from_gdrive(folder_id: str, output_dir: str):
         print(f"Error downloading: {e}")
         return False
 
+def organize_downloaded_files(download_dir: Path, backend_dir: Path):
+    """Move downloaded files to correct locations"""
+    print("Organizing downloaded files...")
+    
+    if not download_dir.exists():
+        print(f"Download directory {download_dir} does not exist")
+        return False
+    
+    # List all downloaded items
+    for item in download_dir.iterdir():
+        print(f"  Found: {item.name}")
+        
+        # Move CSV files to dataset folder
+        if item.suffix == '.csv':
+            dataset_dir = backend_dir / "dataset"
+            dataset_dir.mkdir(parents=True, exist_ok=True)
+            dest = dataset_dir / item.name
+            print(f"    Moving to {dest}")
+            shutil.move(str(item), str(dest))
+        
+        # Move chroma_db folder
+        elif item.name == 'chroma_db' and item.is_dir():
+            dest = backend_dir / "chroma_db"
+            if dest.exists():
+                shutil.rmtree(dest)
+            print(f"    Moving to {dest}")
+            shutil.move(str(item), str(dest))
+        
+        # Move manga_chroma_db folder
+        elif item.name == 'manga_chroma_db' and item.is_dir():
+            dest = backend_dir / "manga_chroma_db"
+            if dest.exists():
+                shutil.rmtree(dest)
+            print(f"    Moving to {dest}")
+            shutil.move(str(item), str(dest))
+        
+        # Handle nested directories (in case GDrive creates them)
+        elif item.is_dir():
+            print(f"    Recursively processing subdirectory: {item.name}")
+            organize_downloaded_files(item, backend_dir)
+    
+    return True
+
 def setup_data():
     """Download all required data files"""
     backend_dir = Path(__file__).parent
@@ -49,19 +86,14 @@ def setup_data():
     # Check if data already exists
     dataset_dir = backend_dir / "dataset"
     chroma_dir = backend_dir / "chroma_db"
-    manga_chroma_dir = backend_dir / "manga_chroma_db"
     
-    needs_download = False
+    dataset_exists = (dataset_dir / "anime.csv").exists()
+    chroma_exists = chroma_dir.exists() and any(chroma_dir.iterdir()) if chroma_dir.exists() else False
     
-    if not (dataset_dir / "anime.csv").exists():
-        print("Dataset not found, will download...")
-        needs_download = True
+    print(f"Dataset exists: {dataset_exists}")
+    print(f"ChromaDB exists: {chroma_exists}")
     
-    if not chroma_dir.exists() or not any(chroma_dir.iterdir()):
-        print("ChromaDB embeddings not found, will download...")
-        needs_download = True
-        
-    if not needs_download:
+    if dataset_exists and chroma_exists:
         print("All data files present, skipping download.")
         return True
     
@@ -70,18 +102,19 @@ def setup_data():
     print("DOWNLOADING DATA FROM GOOGLE DRIVE")
     print("=" * 50)
     
-    success = download_folder_from_gdrive(GDRIVE_FOLDER_ID, str(backend_dir / "data_download"))
+    download_dir = backend_dir / "data_download"
+    success = download_folder_from_gdrive(GDRIVE_FOLDER_ID, str(download_dir))
     
     if success:
-        # Move files to correct locations
-        download_dir = backend_dir / "data_download"
+        organize_downloaded_files(download_dir, backend_dir)
         
-        # Check what was downloaded and move to correct places
-        print("Organizing downloaded files...")
-        
-        # You may need to adjust these paths based on how files are structured in GDrive
-        for item in download_dir.iterdir():
-            print(f"  Found: {item.name}")
+        # Cleanup download folder
+        if download_dir.exists():
+            shutil.rmtree(download_dir)
+            print("Cleaned up download folder")
+    else:
+        print("WARNING: Failed to download data from GDrive!")
+        print("The server may not function correctly without data files.")
     
     return success
 
