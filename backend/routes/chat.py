@@ -509,23 +509,35 @@ def get_user_profile_context(user: User, db: Session) -> str:
     if not rated:
         return ""
     
-    store = get_vector_store()
+    try:
+        store = get_vector_store()
+    except Exception as e:
+        print(f"Vector store unavailable for profile context: {e}")
+        # Return simple profile without anime details
+        profile_text = f"\n\n=== {user.username}'s Anime Profile ===\n"
+        profile_text += f"User has rated {len(rated)} anime.\n"
+        return profile_text
+    
     profile_text = f"\n\n=== {user.username}'s Anime Profile ===\n"
     
     loved, liked, disliked = [], [], []
     
     for entry in rated:
-        result = store.collection.get(ids=[str(entry.anime_id)], include=["metadatas"])
-        if result["metadatas"]:
-            title = result["metadatas"][0].get("title", f"Anime #{entry.anime_id}")
-            genres = result["metadatas"][0].get("genres", "")
-            
-            if entry.rating >= 8:
-                loved.append(f"{title} ({entry.rating}/10)")
-            elif entry.rating >= 6:
-                liked.append(f"{title} ({entry.rating}/10)")
-            else:
-                disliked.append(f"{title} ({entry.rating}/10)")
+        try:
+            result = store.collection.get(ids=[str(entry.anime_id)], include=["metadatas"])
+            if result["metadatas"]:
+                title = result["metadatas"][0].get("title", f"Anime #{entry.anime_id}")
+                genres = result["metadatas"][0].get("genres", "")
+                
+                if entry.rating >= 8:
+                    loved.append(f"{title} ({entry.rating}/10)")
+                elif entry.rating >= 6:
+                    liked.append(f"{title} ({entry.rating}/10)")
+                else:
+                    disliked.append(f"{title} ({entry.rating}/10)")
+        except Exception:
+            # Skip this entry if lookup fails
+            pass
     
     if loved:
         profile_text += f"LOVED: {', '.join(loved[:5])}\n"
