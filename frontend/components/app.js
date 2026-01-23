@@ -4,13 +4,13 @@
  */
 
 // API Configuration
-// For production: Set RAILWAY_BACKEND_URL to your Railway deployment URL
+// For production: Uses Render backend URL
 // For local dev: Uses localhost
-const RAILWAY_BACKEND_URL = 'https://aniverse-production.up.railway.app'; // UPDATE THIS after Railway deployment
+const RENDER_BACKEND_URL = 'https://aniverse-n0fy.onrender.com';
 
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:8000'
-    : RAILWAY_BACKEND_URL;
+    : RENDER_BACKEND_URL;
 
 // Auth State
 let currentUser = null;
