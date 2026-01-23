@@ -4,13 +4,13 @@
  */
 
 // API Configuration
-// For production: Uses Render backend URL
+// For production: Uses Hugging Face Spaces backend
 // For local dev: Uses localhost
-const RENDER_BACKEND_URL = 'https://aniverse-n0fy.onrender.com';
+const HF_BACKEND_URL = 'https://penguindrum920-aniverse.hf.space';
 
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:8000'
-    : RENDER_BACKEND_URL;
+    : HF_BACKEND_URL;
 
 // Auth State
 let currentUser = null;
