@@ -26,17 +26,23 @@ class MangaVectorStore:
                 )
             )
             
-            # Use sentence-transformers for embeddings (more compatible)
-            self.embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
-                model_name=EMBEDDING_MODEL
-            )
+            # Use ChromaDB's default embedding function
+            self.embedding_fn = embedding_functions.DefaultEmbeddingFunction()
             
-            # Get or create manga collection with embedding function
-            self.collection = self.client.get_or_create_collection(
-                name="manga",
-                metadata={"hnsw:space": "cosine"},
-                embedding_function=self.embedding_fn
-            )
+            # Get or create manga collection
+            try:
+                # Try getting without specifying function first
+                self.collection = self.client.get_collection(
+                    name="manga",
+                    embedding_function=self.embedding_fn
+                )
+            except Exception:
+                # Fallback to create/get
+                self.collection = self.client.get_or_create_collection(
+                    name="manga",
+                    metadata={"hnsw:space": "cosine"},
+                    embedding_function=self.embedding_fn
+                )
             
             print(f"Manga vector store initialized at {self.persist_dir}")
             print(f"Manga collection count: {self.collection.count()}")

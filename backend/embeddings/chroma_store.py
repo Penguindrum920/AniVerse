@@ -25,23 +25,39 @@ class AnimeVectorStore:
                 )
             )
             
-            # Use sentence-transformers for embeddings (more compatible than onnxruntime)
+            # Use ChromaDB's default embedding function
             from chromadb.utils import embedding_functions
-            self.embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
-                model_name=EMBEDDING_MODEL
-            )
+            self.embedding_fn = embedding_functions.DefaultEmbeddingFunction()
             
-            # Get or create anime collection with embedding function
-            self.collection = self.client.get_or_create_collection(
-                name="anime",
-                metadata={"hnsw:space": "cosine"},
-                embedding_function=self.embedding_fn
-            )
+            # Get or create anime collection
+            # Try getting without specifying embedding function first to avoid conflicts
+            try:
+                self.collection = self.client.get_collection(
+                    name="anime",
+                    embedding_function=self.embedding_fn
+                )
+            except Exception:
+                # If that fails or doesn't exist, try creating/getting with specific config
+                self.collection = self.client.get_or_create_collection(
+                    name="anime",
+                    metadata={"hnsw:space": "cosine"},
+                    embedding_function=self.embedding_fn
+                )
             
             print(f"Vector store initialized at {self.persist_dir}")
             print(f"Collection count: {self.collection.count()}")
         except Exception as e:
             print(f"ERROR initializing vector store: {e}")
+            # Try to load without embedding function as last resort (for reading only)
+            try:
+                if 'conflict' in str(e).lower():
+                    print("Attempting to load collection without enforcing embedding function...")
+                    self.collection = self.client.get_collection(name="anime")
+                    print("Success! Loaded existing collection config.")
+                    return
+            except:
+                pass
+                
             import traceback
             traceback.print_exc()
             raise
