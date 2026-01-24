@@ -44,7 +44,7 @@ class ChatResponse(BaseModel):
 ACTION_PATTERNS = {
     "add_completed": r"(?:add|mark|set|put)\s+(.+?)\s+(?:to|as|in)\s+(?:my\s+)?completed(?:\s+list)?(?:\s+with\s+(?:a\s+)?rating\s+(?:of\s+)?(\d+(?:\.\d+)?))?",
     "add_watching": r"(?:add|mark|set|put)\s+(.+?)\s+(?:to|as|in)\s+(?:my\s+)?(?:watching|currently watching)(?:\s+list)?",
-    "add_planned": r"(?:add|mark|set|put)\s+(.+?)\s+(?:to|as|in)\s+(?:my\s+)?(?:plan(?:ned)?(?:\s+to\s+watch)?|watchlist|ptw)(?:\s+list)?",
+    "add_planned": r"(?:add|mark|set|put)\s+(.+?)\s+(?:to|as|in)\s+(?:my\s+)?(?:plan(?:ned)?(?:\s+to\s+watch)?|watchlist|ptw|list)(?:\s+list)?",
     "add_dropped": r"(?:add|mark|set|put)\s+(.+?)\s+(?:to|as|in)\s+(?:my\s+)?dropped(?:\s+list)?",
     "add_on_hold": r"(?:add|mark|set|put)\s+(.+?)\s+(?:to|as|in)\s+(?:my\s+)?(?:on[\s_-]?hold|paused)(?:\s+list)?",
     "rate_anime": r"(?:rate|give|score)\s+(.+?)\s+(?:a\s+)?(\d+(?:\.\d+)?)\s*(?:out of 10|/10|stars?)?",
