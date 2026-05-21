@@ -1,14 +1,14 @@
 """Database setup and models"""
 import os
 from datetime import datetime
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey, Enum as SQLEnum
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey, Enum as SQLEnum, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 import enum
 
 
 # Database path
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "aniverse.db")
+DB_PATH = os.getenv("DATABASE_PATH", os.path.join(os.path.dirname(os.path.dirname(__file__)), "aniverse.db"))
 DATABASE_URL = f"sqlite:///{DB_PATH}"
 
 # Create engine
@@ -73,6 +73,40 @@ class UserManga(Base):
     
     # Relationships
     user = relationship("User", back_populates="manga_list")
+
+
+class CachedAnime(Base):
+    """Live provider anime cached for search, details, and lazy vector indexing."""
+    __tablename__ = "cached_anime"
+
+    id = Column(Integer, primary_key=True, index=True)  # public AniVerse ID
+    mal_id = Column(Integer, index=True, nullable=True)
+    anilist_id = Column(Integer, unique=True, index=True, nullable=True)
+    provider = Column(String, default="anilist", nullable=False)
+
+    title = Column(String, nullable=False)
+    title_english = Column(String, nullable=True)
+    title_japanese = Column(String, nullable=True)
+    media_type = Column(String, nullable=True)
+    episodes = Column(Integer, nullable=True)
+    status = Column(String, nullable=True)
+    score = Column(Float, nullable=True)
+    scored_by = Column(Integer, nullable=True)
+    rank = Column(Integer, nullable=True)
+    popularity = Column(Integer, nullable=True)
+    favorites = Column(Integer, nullable=True)
+    synopsis = Column(Text, nullable=True)
+    genres = Column(Text, nullable=True)  # JSON list
+    studios = Column(Text, nullable=True)  # JSON list
+    source = Column(String, nullable=True)
+    rating = Column(String, nullable=True)
+    image_url = Column(String, nullable=True)
+    start_date = Column(String, nullable=True)
+    end_date = Column(String, nullable=True)
+    site_url = Column(String, nullable=True)
+    raw_json = Column(Text, nullable=True)
+    cached_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
 def init_db():

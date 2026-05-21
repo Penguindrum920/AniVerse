@@ -26,8 +26,17 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 
 # Model Settings
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
-LLM_MODEL = "llama-3.1-8b-instant"  # Fast, free on Groq
+LLM_MODEL = os.getenv("LLM_MODEL", "llama-3.1-8b-instant")  # Fast, free on Groq
 
 # API Settings
-JIKAN_BASE_URL = "https://api.jikan.moe/v4"
-JIKAN_RATE_LIMIT = 3  # requests per second
+ANILIST_GRAPHQL_URL = os.getenv("ANILIST_GRAPHQL_URL", "https://graphql.anilist.co")
+JIKAN_BASE_URL = os.getenv("JIKAN_BASE_URL", "https://api.jikan.moe/v4")
+JIKAN_RATE_LIMIT = int(os.getenv("JIKAN_RATE_LIMIT", "3"))  # requests per second
+
+# Live metadata provider settings
+LIVE_PROVIDER_ENABLED = os.getenv("LIVE_PROVIDER_ENABLED", "true").lower() in {"1", "true", "yes", "on"}
+LIVE_CACHE_TTL_HOURS = int(os.getenv("LIVE_CACHE_TTL_HOURS", "24"))
+LIVE_SEARCH_TIMEOUT = float(os.getenv("LIVE_SEARCH_TIMEOUT", "8"))
+
+# Synthetic IDs keep AniList-only records addressable by the current MAL-ID based frontend.
+LIVE_ID_OFFSET = int(os.getenv("LIVE_ID_OFFSET", "1000000000"))

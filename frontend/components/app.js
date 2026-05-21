@@ -445,6 +445,7 @@ function createAnimeCard(anime, showUserRating = false) {
         <div class="anime-card-info">
             <div class="anime-card-title">${anime.title}</div>
             <div class="anime-card-genres">${genres}</div>
+            ${anime.reason ? `<div class="anime-card-reason">${anime.reason}</div>` : ''}
         </div>
     `;
     return card;
@@ -1440,4 +1441,3 @@ window.removeFromMangaList = removeFromMangaList;
 init();
 initViewToggle();
 checkImportCallback();
-

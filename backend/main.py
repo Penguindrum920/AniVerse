@@ -67,19 +67,40 @@ async def health_check():
 @app.get("/api/stats")
 async def get_stats():
     """Get database statistics"""
-    from embeddings.chroma_store import get_vector_store
-    from embeddings.manga_chroma_store import get_manga_vector_store
-    from config import DATASET_PATH
+    from config import DATASET_PATH, MANGA_DATASET_PATH
     import pandas as pd
-    
-    anime_store = get_vector_store()
-    manga_store = get_manga_vector_store()
-    df = pd.read_csv(DATASET_PATH)
-    
+
+    total_anime = len(pd.read_csv(DATASET_PATH)) if DATASET_PATH.exists() else 0
+    total_manga = len(pd.read_csv(MANGA_DATASET_PATH)) if MANGA_DATASET_PATH.exists() else 0
+    indexed_anime = 0
+    indexed_manga = 0
+    vector_store_errors = {}
+
+    try:
+        from embeddings.chroma_store import get_vector_store
+        indexed_anime = get_vector_store().get_count()
+    except Exception as e:
+        vector_store_errors["anime"] = str(e)
+
+    try:
+        from embeddings.manga_chroma_store import get_manga_vector_store
+        indexed_manga = get_manga_vector_store().get_count()
+    except Exception as e:
+        vector_store_errors["manga"] = str(e)
+
+    try:
+        from embeddings.local_retrieval_model import get_model_artifact_info
+        retrieval_model = get_model_artifact_info()
+    except Exception as e:
+        retrieval_model = {"available": False, "error": str(e)}
+
     return {
-        "total_anime": len(df),
-        "indexed_anime": anime_store.get_count(),
-        "indexed_manga": manga_store.get_count(),
+        "total_anime": total_anime,
+        "total_manga": total_manga,
+        "indexed_anime": indexed_anime,
+        "indexed_manga": indexed_manga,
+        "retrieval_model": retrieval_model,
+        "vector_store_errors": vector_store_errors,
     }
 
 

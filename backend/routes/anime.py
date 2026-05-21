@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import DATASET_PATH
 from data.anime_schema import Anime, parse_list_field
 from embeddings.chroma_store import get_vector_store
+from providers.live_anime import anime_to_detail_response, get_live_anime, index_live_anime, list_live_anime
 
 router = APIRouter(prefix="/api/anime", tags=["Anime"])
 
@@ -18,6 +19,10 @@ _df = None
 def get_dataframe():
     global _df
     if _df is None:
+        if not DATASET_PATH.exists():
+            print(f"Anime dataset not found at {DATASET_PATH}; using live providers only.")
+            _df = pd.DataFrame()
+            return _df
         _df = pd.read_csv(DATASET_PATH)
         _df = _df.rename(columns={
             "id": "mal_id",
@@ -35,35 +40,40 @@ def get_dataframe():
 async def get_anime(mal_id: int):
     """Get detailed information for a specific anime"""
     df = get_dataframe()
-    
-    row = df[df["mal_id"] == mal_id]
-    if row.empty:
-        raise HTTPException(status_code=404, detail=f"Anime with ID {mal_id} not found")
-    
-    row = row.iloc[0]
-    
-    return {
-        "mal_id": int(row["mal_id"]),
-        "title": row["title"],
-        "title_english": row.get("title_english") if pd.notna(row.get("title_english")) else None,
-        "title_japanese": row.get("title_japanese") if pd.notna(row.get("title_japanese")) else None,
-        "media_type": row.get("media_type", "unknown"),
-        "episodes": int(row["num_episodes"]) if pd.notna(row.get("num_episodes")) else None,
-        "status": row.get("status", "unknown"),
-        "score": float(row["score"]) if pd.notna(row.get("score")) else None,
-        "scored_by": int(row["scored_by"]) if pd.notna(row.get("scored_by")) else None,
-        "rank": int(row["rank"]) if pd.notna(row.get("rank")) else None,
-        "popularity": int(row["popularity"]) if pd.notna(row.get("popularity")) else None,
-        "favorites": int(row["favorites"]) if pd.notna(row.get("favorites")) else None,
-        "synopsis": row.get("synopsis") if pd.notna(row.get("synopsis")) else None,
-        "genres": parse_list_field(row.get("genres", "[]")),
-        "studios": parse_list_field(row.get("studios", "[]")),
-        "source": row.get("source") if pd.notna(row.get("source")) else None,
-        "rating": row.get("rating") if pd.notna(row.get("rating")) else None,
-        "image_url": row.get("image_url") if pd.notna(row.get("image_url")) else None,
-        "start_date": str(row.get("start_date")) if pd.notna(row.get("start_date")) else None,
-        "end_date": str(row.get("end_date")) if pd.notna(row.get("end_date")) else None,
-    }
+
+    if not df.empty and "mal_id" in df.columns:
+        row = df[df["mal_id"] == mal_id]
+        if not row.empty:
+            row = row.iloc[0]
+
+            return {
+                "mal_id": int(row["mal_id"]),
+                "title": row["title"],
+                "title_english": row.get("title_english") if pd.notna(row.get("title_english")) else None,
+                "title_japanese": row.get("title_japanese") if pd.notna(row.get("title_japanese")) else None,
+                "media_type": row.get("media_type", "unknown"),
+                "episodes": int(row["num_episodes"]) if pd.notna(row.get("num_episodes")) else None,
+                "status": row.get("status", "unknown"),
+                "score": float(row["score"]) if pd.notna(row.get("score")) else None,
+                "scored_by": int(row["scored_by"]) if pd.notna(row.get("scored_by")) else None,
+                "rank": int(row["rank"]) if pd.notna(row.get("rank")) else None,
+                "popularity": int(row["popularity"]) if pd.notna(row.get("popularity")) else None,
+                "favorites": int(row["favorites"]) if pd.notna(row.get("favorites")) else None,
+                "synopsis": row.get("synopsis") if pd.notna(row.get("synopsis")) else None,
+                "genres": parse_list_field(row.get("genres", "[]")),
+                "studios": parse_list_field(row.get("studios", "[]")),
+                "source": row.get("source") if pd.notna(row.get("source")) else None,
+                "rating": row.get("rating") if pd.notna(row.get("rating")) else None,
+                "image_url": row.get("image_url") if pd.notna(row.get("image_url")) else None,
+                "start_date": str(row.get("start_date")) if pd.notna(row.get("start_date")) else None,
+                "end_date": str(row.get("end_date")) if pd.notna(row.get("end_date")) else None,
+            }
+
+    live_anime = await get_live_anime(mal_id)
+    if live_anime:
+        return anime_to_detail_response(live_anime)
+
+    raise HTTPException(status_code=404, detail=f"Anime with ID {mal_id} not found")
 
 
 @router.get("/{mal_id}/similar")
@@ -72,9 +82,17 @@ async def get_similar_anime(
     limit: int = Query(10, ge=1, le=50)
 ):
     """Get anime similar to the specified anime"""
-    store = get_vector_store()
-    
-    results = store.search_similar(mal_id=mal_id, n_results=limit)
+    try:
+        store = get_vector_store()
+        results = store.search_similar(mal_id=mal_id, n_results=limit)
+        if not results:
+            live_anime = await get_live_anime(mal_id)
+            if live_anime:
+                index_live_anime(live_anime, store=store)
+                results = store.search_similar(mal_id=mal_id, n_results=limit)
+    except Exception as e:
+        print(f"Similar anime search unavailable: {e}")
+        results = []
     
     if not results:
         raise HTTPException(status_code=404, detail=f"Anime with ID {mal_id} not found in vector store")
@@ -105,8 +123,48 @@ async def list_anime(
     media_type: str = Query(None),
     min_score: float = Query(None, ge=0, le=10),
 ):
-    """List anime with pagination, sorting, and filters"""
+    """List anime with live provider data first, then local dataset fallback."""
+    live_results = await list_live_anime(
+        page=page,
+        limit=limit,
+        sort_by=sort_by,
+        order=order,
+        genre=genre,
+        min_score=min_score,
+        media_type=media_type,
+    )
+    if live_results:
+        return {
+            "page": page,
+            "limit": limit,
+            "total": len(live_results),
+            "pages": page + 1,
+            "results": [
+                {
+                    "mal_id": anime["mal_id"],
+                    "title": anime["title"],
+                    "score": anime.get("score"),
+                    "genres": anime.get("genres") or [],
+                    "media_type": anime.get("media_type"),
+                    "image_url": anime.get("image_url"),
+                    "anilist_id": anime.get("anilist_id"),
+                    "external_mal_id": anime.get("external_mal_id"),
+                    "provider": anime.get("provider"),
+                }
+                for anime in live_results
+            ]
+        }
+
     df = get_dataframe()
+    if df.empty:
+        return {
+            "page": page,
+            "limit": limit,
+            "total": 0,
+            "pages": 0,
+            "results": [],
+            "note": "No local dataset is available and live providers returned no data."
+        }
     
     # Apply filters
     if genre:

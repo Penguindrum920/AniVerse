@@ -6,6 +6,8 @@ __pycache__/
 *$py.class
 *.so
 .Python
+.uv-cache/
+.uv-python/
 .venv/
 venv/
 ENV/
@@ -42,5 +44,5 @@ loading/
 ## Large files - excluded from Git (too big for GitHub)
 backend/chroma_db/
 backend/manga_chroma_db/
+backend/models/*.joblib
 dataset/
-
